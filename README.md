@@ -1,5 +1,5 @@
 
-# Anypoint Template: SAP to Salesforce Contact Migration
+# Anypoint Template: Salesforce to Siebel Contact Migration
 
 + [License Agreement](#licenseagreement)
 + [Use Case](#usecase)
