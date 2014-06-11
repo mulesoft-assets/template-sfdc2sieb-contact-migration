@@ -24,7 +24,7 @@ Note that using this template is subject to the conditions of this [License Agre
 Please review the terms of the license before downloading and using this template. In short, you are allowed to use the template for free with Mule ESB Enterprise Edition, CloudHub, or as a trial in Anypoint Studio.
 
 # Use Case <a name="usecase"/>
-I want to synchronize accounts from Salesforce to Siebel.
+I want to synchronize contacts from Salesforce to Siebel.
 
 This Template should serve as a foundation for the process of migrating contacts from Salesforce to Siebel, being able to specify filtering criteria and desired behavior when an contact already exists in the Siebel. 
 

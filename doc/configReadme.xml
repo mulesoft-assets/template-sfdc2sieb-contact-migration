@@ -5,7 +5,7 @@
 	</placeholders>
 	<sections>
 		<section id="use_case">
-I want to synchronize accounts from Salesforce to Siebel.
+I want to synchronize contacts from Salesforce to Siebel.
 
 This Template should serve as a foundation for the process of migrating contacts from Salesforce to Siebel, being able to specify filtering criteria and desired behavior when an contact already exists in the Siebel. 
 
