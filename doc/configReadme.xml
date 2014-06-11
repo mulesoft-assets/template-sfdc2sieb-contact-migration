@@ -34,12 +34,10 @@ To make this Anypoint Template run, there are certain preconditions that must be
 		</section>
 		<section id="application_configuration">
 		<![CDATA[
-**Application configuration
-+ polling.frequency `60000`
-+ polling.start.delay `1000`
-+ watermark.default.expression `YESTERDAY`
+**Application configuration**
++ http.port `9090` 
 
-**Oracle Siebel Connector configuration
+**Oracle Siebel Connector configuration**
 + sieb.user=`user`
 + sieb.password=`secret`
 + sieb.server=`server`
@@ -47,7 +45,7 @@ To make this Anypoint Template run, there are certain preconditions that must be
 + sieb.objectManager=`objectManager`
 + sieb.port=`2321`
 
-**SalesForce Connector configuration**
+**Salesforce Connector configuration**
 
 + sfdc.username=bob.dylan@sfdc
 + sfdc.password=DylanPassword123
@@ -74,8 +72,16 @@ For instance if 10 records are fetched from origin instance, then 1 api
 calls to SFDC will be made ( 1).
 ]]>
 		</section>
-		<section id="api_calls">
-		<![CDATA[This is the file where you will found the inbound and outbound sides of your integration app.
+		<section id="default_business_logic_xml">
+		<![CDATA[
+Functional aspect of the Template is implemented on this XML, directed by one flow responsible of excecuting the logic.
+For the purpose of this particular Template the *mainFlow* just executes a [Batch Job](http://www.mulesoft.org/documentation/display/current/Batch+Processing). which handles all the logic of it.
+This flow has Exception Strategy that basically consists on invoking the *defaultChoiseExceptionStrategy* defined in *errorHandling.xml* file.
+]]>
+		</section>
+		<section id="default_endpoints_xml">
+		<![CDATA[
+This is the file where you will found the inbound and outbound sides of your integration app.
 This Template has only an [HTTP Inbound Endpoint](http://www.mulesoft.org/documentation/display/current/HTTP+Endpoint+Reference) as the way to trigger the use case.
 
 ###  Inbound Flow

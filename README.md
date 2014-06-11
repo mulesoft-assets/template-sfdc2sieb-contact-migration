@@ -108,12 +108,10 @@ Mule Studio provides you with really easy way to deploy your Template directly t
 In order to use this Mule Anypoint Template you need to configure properties (Credentials, configurations, etc.) either in properties file or in CloudHub as Environment Variables. Detail list with examples:
 
 ### Application configuration
-**Application configuration
-+ polling.frequency `60000`
-+ polling.start.delay `1000`
-+ watermark.default.expression `YESTERDAY`
+**Application configuration**
++ http.port `9090` 
 
-**Oracle Siebel Connector configuration
+**Oracle Siebel Connector configuration**
 + sieb.user=`user`
 + sieb.password=`secret`
 + sieb.server=`server`
@@ -121,7 +119,7 @@ In order to use this Mule Anypoint Template you need to configure properties (Cr
 + sieb.objectManager=`objectManager`
 + sieb.port=`2321`
 
-**SalesForce Connector configuration**
+**Salesforce Connector configuration**
 
 + sfdc.username=bob.dylan@sfdc
 + sfdc.password=DylanPassword123
@@ -129,15 +127,21 @@ In order to use this Mule Anypoint Template you need to configure properties (Cr
 + sfdc.url=https://test.salesforce.com/services/Soap/u/28.0
 
 # API Calls <a name="apicalls"/>
-This is the file where you will found the inbound and outbound sides of your integration app.
-This Template has only an [HTTP Inbound Endpoint](http://www.mulesoft.org/documentation/display/current/HTTP+Endpoint+Reference) as the way to trigger the use case.
+SalesForce imposes limits on the number of API Calls that can be made.
+Therefore calculating this amount may be an important factor to
+consider. Product Broadcast Template calls to the API can be
+calculated using the formula:
 
-###  Inbound Flow
-**HTTP Inbound Endpoint** - Start Report Generation
-+ `${http.port}` is set as a property to be defined either on a property file or in CloudHub environment variables.
-+ The path configured by default is `migratecontacts` and you are free to change for the one you prefer.
-+ The host name for all endpoints in your CloudHub configuration should be defined as `localhost`. CloudHub will then route requests from your application domain URL to the endpoint.
-+ The endpoint is configured as a *request-response* since as a result of calling it the response will be the total of Contacts synced and filtered by the criteria specified.
+**X / 200**
+
+Being X the number of Products to be synchronized on each run.
+
+The division by 200 is because, by default, Users are gathered in groups
+of 200 for each Upsert API Call in the commit step. Also consider
+that this calls are executed repeatedly every polling cycle.
+
+For instance if 10 records are fetched from origin instance, then 1 api
+calls to SFDC will be made ( 1).
 
 
 # Customize It!<a name="customizeit"/>
@@ -160,15 +164,20 @@ Configuration for Connectors and [Properties Place Holders](http://www.mulesoft.
 In the visual editor they can be found on the *Global Element* tab.
 
 ## businessLogic.xml<a name="businesslogicxml"/>
-Functional aspect of the Anypoint Template is implemented on this XML, directed by a batch job that will be responsible for creations/updates. The severeal message processors constitute four high level actions that fully implement the logic of this Anypoint Template:
-
-1. Job execution is invoked from triggerFlow (inboundEndpoints.xml) everytime there is a new query executed asking for created/updated Contacts.
-2. During the Process stage, each SFDC User will be filtered depending on, if it has an existing matching user in the SFDC Org B.
-3. The last step of the Process stage will group the users and create/update them in SFDC Org B.
-Finally during the On Complete stage the Anypoint Template will logoutput statistics data into the console.
+Functional aspect of the Template is implemented on this XML, directed by one flow responsible of excecuting the logic.
+For the purpose of this particular Template the *mainFlow* just executes a [Batch Job](http://www.mulesoft.org/documentation/display/current/Batch+Processing). which handles all the logic of it.
+This flow has Exception Strategy that basically consists on invoking the *defaultChoiseExceptionStrategy* defined in *errorHandling.xml* file.
 
 ## endpoints.xml<a name="endpointsxml"/>
-This is file is conformed by a Flow containing the Poll that will periodically query Sales Force for updated/created Contacts that meet the defined criteria in the query. And then executing the batch job process with the query results.
+This is the file where you will found the inbound and outbound sides of your integration app.
+This Template has only an [HTTP Inbound Endpoint](http://www.mulesoft.org/documentation/display/current/HTTP+Endpoint+Reference) as the way to trigger the use case.
+
+###  Inbound Flow
+**HTTP Inbound Endpoint** - Start Report Generation
++ `${http.port}` is set as a property to be defined either on a property file or in CloudHub environment variables.
++ The path configured by default is `migratecontacts` and you are free to change for the one you prefer.
++ The host name for all endpoints in your CloudHub configuration should be defined as `localhost`. CloudHub will then route requests from your application domain URL to the endpoint.
++ The endpoint is configured as a *request-response* since as a result of calling it the response will be the total of Contacts synced and filtered by the criteria specified.
 
 ## errorHandling.xml<a name="errorhandlingxml"/>
 Contains a [Catch Exception Strategy](http://www.mulesoft.org/documentation/display/current/Catch+Exception+Strategy) that is only Logging the exception thrown (If so). As you imagine, this is the right place to handle how your integration will react depending on the different exceptions.
