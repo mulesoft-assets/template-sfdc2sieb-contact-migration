@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
 		<groupId>org.mule.templates</groupId>
@@ -9,24 +8,13 @@
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.mulesoft.templates</groupId>
 	<artifactId>template-sfdc2sieb-contact-migration</artifactId>
 	<packaging>mule</packaging>
 	<version>1.0.0-SNAPSHOT</version>
 	<name>template-sfdc2sieb-contact-migration Anypoint Template Project</name>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-		<mule.version>3.5.0-M4</mule.version>
-		<munit.version>3.5-M1</munit.version>
-		<junit.version>4.9</junit.version>
 		<sfdc.version>5.4.7</sfdc.version>
-
-		<eclipsePluginVersion>2.8</eclipsePluginVersion>
-		<jdkName>JavaSE-1.6</jdkName>
-		<jdk.version>1.6</jdk.version>
 	</properties>
 
 	<scm>
@@ -47,7 +35,11 @@
 							<groupId>org.mule.modules</groupId>
 							<artifactId>mule-module-sfdc</artifactId>
 						</inclusion>
-					</inclusions>
+					<inclusion>
+                            <groupId>org.mule.modules</groupId>
+                            <artifactId>mule-module-siebel</artifactId>
+                        </inclusion>
+                    </inclusions>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -61,18 +53,11 @@
 			<version>${sfdc.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.mulesoft.muleesb.modules</groupId>
-			<artifactId>mule-module-batch-ee</artifactId>
-			<version>${mule.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mule.modules</groupId>
-			<artifactId>mule-module-spring-config</artifactId>
-			<version>${mule.version}</version>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
+            <groupId>org.mule.modules</groupId>
+            <artifactId>mule-module-siebel</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+    </dependencies>
 
 	<repositories>
 		<repository>
