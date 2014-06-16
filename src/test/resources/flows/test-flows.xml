@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc"
+	xmlns:siebel="http://www.mulesoft.org/schema/mule/siebel" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.5.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/siebel http://www.mulesoft.org/schema/mule/siebel/current/mule-siebel.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd">
+
+    <sub-flow name="createAccountInSalesforceFlow" doc:name="createAccountInSalesforceFlow">
+        <sfdc:create config-ref="Salesforce" type="Account" doc:name="Create account in Salesforce">
+            <sfdc:objects ref="#[payload]"/>
+        </sfdc:create>
+        <logger level="INFO" message="Create Accounts in Salesforce result: #[payload]" doc:name="Logger"/>
+    </sub-flow>
+
+    <sub-flow name="createContactInSalesforceFlow" doc:name="createAccountInSalesforceFlow">
+        <sfdc:create config-ref="Salesforce" type="Contact" doc:name="Create account in Salesforce">
+            <sfdc:objects ref="#[payload]"/>
+        </sfdc:create>
+        <logger level="INFO" message="Create Contacts in Salesforce result: #[payload]" doc:name="Logger"/>
+    </sub-flow>
+
+	<sub-flow name="selectContactFromSiebelFlow" doc:name="selectContactFromSiebelFlow">
+		<siebel:query-business-components
+			config-ref="OracleSiebelBusinessObjects" businessObjectComponentType="Contact.Contact"
+			doc:name="query Contact from Siebel" searchExpression="[Email Address] = &quot;#[payload.Email]&quot;">
+			<siebel:fields-to-retrieve>
+				<siebel:fields-to-retrieve>Id</siebel:fields-to-retrieve>
+				<siebel:fields-to-retrieve>Email Address</siebel:fields-to-retrieve>
+				<siebel:fields-to-retrieve>Last Name</siebel:fields-to-retrieve>
+			</siebel:fields-to-retrieve>
+		</siebel:query-business-components>
+	</sub-flow>
+
+    <sub-flow name="selectAccountFromSiebelFlow" doc:name="selectAccountFromSiebelFlow">
+        <siebel:query-business-components config-ref="OracleSiebelBusinessObjects" businessObjectComponentType="Account.Account" searchExpression="Name = '#[payload['Name']]'" doc:name="query account from Siebel instance">
+            <siebel:fields-to-retrieve>
+                <siebel:fields-to-retrieve>Id</siebel:fields-to-retrieve>
+            </siebel:fields-to-retrieve>
+        </siebel:query-business-components>
+        <logger level="INFO" message="Retrieve Accounts result: #[payload]" doc:name="Logger"/>
+    </sub-flow>
+
+	<sub-flow name="deleteAccountFromSalesforceFlow" doc:name="deleteAccountFromSalesforceFlow">
+		<sfdc:delete config-ref="Salesforce" doc:name="Salesforce">
+			<sfdc:ids ref="#[payload]" />
+		</sfdc:delete>
+	</sub-flow>
+
+	<sub-flow name="deleteAccountsFromSiebelFlow" doc:name="deleteAccountsFromSiebelFlow">
+		<foreach doc:name="For Each">
+			<siebel:delete-business-component
+				config-ref="OracleSiebelBusinessObjects" businessComponentId="#[payload]"
+				businessObjectComponentType="Account.Account" doc:name="Oracle Siebel Business Objects" />
+		</foreach>
+	</sub-flow>
+
+	<sub-flow name="deleteContactsFromSiebelFlow" doc:name="deleteContactsFromSiebelFlow">
+		<foreach doc:name="For Each">
+			<siebel:delete-business-component
+				config-ref="OracleSiebelBusinessObjects" businessComponentId="#[payload]"
+				businessObjectComponentType="Contact.Contact" doc:name="Oracle Siebel Business Objects" />
+		</foreach>
+	</sub-flow>
+</mule>
