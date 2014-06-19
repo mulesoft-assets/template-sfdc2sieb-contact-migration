@@ -14,7 +14,7 @@
 	<name>template-sfdc2sieb-contact-migration Anypoint Template Project</name>
 
 	<properties>
-		<sfdc.version>5.4.7</sfdc.version>
+		<siebel.version>1.0.0</siebel.version>
 	</properties>
 
 	<scm>
@@ -55,7 +55,7 @@
 		<dependency>
             <groupId>org.mule.modules</groupId>
             <artifactId>mule-module-siebel</artifactId>
-            <version>1.0.0</version>
+            <version>${siebel.version}</version>
         </dependency>
     </dependencies>
 

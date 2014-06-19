@@ -17,7 +17,7 @@ http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schem
         <batch:process-records><!-- Email Address, FirstName, Last Update - SDQ, LastName, Account Id, Account Number -->
             <batch:step name="getContactFromSiebelStep">
                 <enricher source="#[payload]" target="#[recordVars['siebelContact']]" doc:name="Store payload into variable 'siebelContact'">
-                    <siebel:query-business-components config-ref="OracleSiebelBusinessObjects" businessObjectComponentType="Contact.Contact" doc:name="query Accounts from Siebel" searchExpression="[Email Address] = &quot;#[payload.Email]&quot;">
+                    <siebel:query-business-components config-ref="OracleSiebelBusinessObjects" businessObjectComponentType="Contact.Contact" doc:name="query Contacts from Siebel" searchExpression="[Email Address] = &quot;#[payload.Email]&quot;">
 		                <siebel:fields-to-retrieve>
 		                	<siebel:fields-to-retrieve>Id</siebel:fields-to-retrieve>
 		                	<siebel:fields-to-retrieve>Email Address</siebel:fields-to-retrieve>
