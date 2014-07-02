@@ -158,7 +158,8 @@ In order to use this Mule Anypoint Template you need to configure properties (Cr
 + sieb.server=`server`
 + sieb.serverName=`serverName`
 + sieb.objectManager=`objectManager`
-+ sieb.port=`2321`
++ sieb.port=`2321
++ sieb.timeOffset=`-7`
 
 **Salesforce Connector configuration**
 

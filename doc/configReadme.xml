@@ -43,7 +43,8 @@ To make this Anypoint Template run, there are certain preconditions that must be
 + sieb.server=`server`
 + sieb.serverName=`serverName`
 + sieb.objectManager=`objectManager`
-+ sieb.port=`2321`
++ sieb.port=`2321
++ sieb.timeOffset=`-7`
 
 **Salesforce Connector configuration**
 
