@@ -83,7 +83,7 @@ list.add(payload);
             </batch:step>
             <batch:step name="selectNewerContactStep" accept-expression="!(recordVars['contactInSiebel'] == null)">
                 <choice doc:name="Choice">
-                    <when expression="#[org.mule.templates.util.ContactDateComparator.isAfter(payload, recordVars['contactInSiebel'])]">
+                    <when expression="#[org.mule.templates.date.DateUtils.stringToDateTimeWithProvidedOffset(payload['LastModifiedDate'], 'MM/dd/yyyy HH:mm:ss', '${sieb.timeOffset}').isAfter(org.mule.templates.date.DateUtils.ISOStringDateToDateTime(recordVars['contactInSiebel']['LastModifiedDate']))]">
                         <expression-component doc:name="define Id in SalesForce"><![CDATA[payload['Id'] = recordVars['contactInSiebel']['Id']
 
 ]]></expression-component>
