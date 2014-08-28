@@ -10,7 +10,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>template-sfdc2sieb-contact-migration</artifactId>
 	<packaging>mule</packaging>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<name>template-sfdc2sieb-contact-migration Anypoint Template Project</name>
 
 	<properties>
