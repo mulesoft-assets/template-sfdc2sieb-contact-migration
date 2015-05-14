@@ -1,21 +1,17 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
 		<groupId>org.mule.templates</groupId>
 		<artifactId>templates-tooling-parent-pom</artifactId>
-		<version>1.0.7</version>
+		<version>1.1.9</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>template-sfdc2sieb-contact-migration</artifactId>
 	<packaging>mule</packaging>
-	<version>1.0.4-SNAPSHOT</version>
+	<version>1.1.0-SNAPSHOT</version>
 	<name>template-sfdc2sieb-contact-migration Anypoint Template Project</name>
-
-	<properties>
-		<siebel.version>2.0.0</siebel.version>
-	</properties>
 
 	<scm>
 		<connection>scm:git:https://github.com/mulesoft/template-sfdc2sieb-contact-migration.git</connection>
@@ -56,7 +52,7 @@
 		<dependency>
             <groupId>org.mule.modules</groupId>
             <artifactId>mule-module-siebel</artifactId>
-            <version>${siebel.version}</version>
+            <version>${sieb.version}</version>
         </dependency>
         <dependency>
 			<groupId>siebel</groupId>
@@ -70,6 +66,12 @@
 			<version>8.1.1.11</version>
 			<scope>test</scope>
 		</dependency>
+    <dependency>
+            <groupId>org.mule.modules</groupId>
+            <artifactId>mule-module-http</artifactId>
+            <version>${mule.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 	<repositories>
