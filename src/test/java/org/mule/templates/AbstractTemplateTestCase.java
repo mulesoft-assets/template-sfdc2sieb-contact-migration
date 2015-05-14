@@ -33,7 +33,7 @@ public abstract class AbstractTemplateTestCase extends FunctionalTestCase {
 	private static final String MAPPINGS_FOLDER_PATH = "./mappings";
 	private static final String TEST_FLOWS_FOLDER_PATH = "./src/test/resources/flows/";
 	private static final String MULE_DEPLOY_PROPERTIES_PATH = "./src/main/app/mule-deploy.properties";
-	private static final Logger LOGGER = LogManager.getLogger(BusinessLogicIT.class);
+	private static final Logger LOGGER = LogManager.getLogger(AbstractTemplateTestCase.class);
 
 	protected static final String TEMPLATE_NAME = "contact-migration";
 	protected static final String POLL_FLOW_NAME = "triggerFlow";
