@@ -11,8 +11,8 @@ import java.io.FileInputStream;
 import java.util.Date;
 import java.util.Properties;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Rule;
 import org.mule.api.config.MuleProperties;
 import org.mule.context.notification.NotificationException;
@@ -20,7 +20,6 @@ import org.mule.tck.junit4.FunctionalTestCase;
 import org.mule.tck.junit4.rule.DynamicPort;
 import org.mule.tck.probe.PollingProber;
 import org.mule.tck.probe.Prober;
-import org.mule.templates.integration.BusinessLogicIT;
 import org.mule.templates.test.utils.ListenerProbe;
 import org.mule.templates.test.utils.PipelineSynchronizeListener;
 

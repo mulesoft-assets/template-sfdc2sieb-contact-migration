@@ -63,16 +63,15 @@ In order to make the siebel connector work smoothly you have to provide the corr
 		<![CDATA[
 SalesForce imposes limits on the number of API Calls that can be made.
 Therefore calculating this amount may be an important factor to
-consider. Product Broadcast Template calls to the API can be
+consider. Contact Migration Template calls to the API can be
 calculated using the formula:
 
 **X / 200**
 
-Being X the number of Products to be synchronized on each run.
+Being X the number of Contacts to be synchronized on each run.
 
-The division by 200 is because, by default, Users are gathered in groups
-of 200 for each Upsert API Call in the commit step. Also consider
-that this calls are executed repeatedly every polling cycle.
+The division by 200 is because, by default, Contacts are gathered in groups
+of 200 for each API Call in the input step. 
 
 For instance if 10 records are fetched from origin instance, then 1 api
 calls to SFDC will be made ( 1).
