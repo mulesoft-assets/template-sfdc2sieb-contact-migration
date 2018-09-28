@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+      xmlns:email="http://www.mulesoft.org/schema/mule/email"
+      xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+
+<flow name="businessLogicFlow" doc:id="884f86c5-66e1-4701-bb9b-594c2a60abf3" >
+    <batch:job jobName="migrateObjectsBatch" doc:id="79b373e6-1aeb-43a9-9dfe-8ac0d2f31fdc" >
+        <batch:process-records >
+            <batch:step name="getContactsFromNetsuite" doc:id="232087de-e311-49c1-a890-439c65ea1af2" >
+            </batch:step>
+            <batch:step name="upsertContactsInNetsuiteStep" doc:id="78a74ab4-9b91-416d-985a-acda2ac377eb">
+                <batch:aggregator doc:name="Batch Aggregator" doc:id="1ad86a98-643e-494a-a90a-32daab0b03cc" size="${page.size}">
+                </batch:aggregator>
+            </batch:step>
+        </batch:process-records>
+        <batch:on-complete >
+            <scatter-gather doc:name="Scatter-Gather" doc:id="ef2964ef-0b85-4c6c-a5ee-b834df639e7b">
+                <route>
+                    <logger level="INFO" doc:name="Migration process has finished!" doc:id="b7575d38-7dbd-4602-9186-1bbb25234896" message="Migration process has finished!" />
+                </route>
+                <route>
+                    <ee:transform doc:name="Prepare migration result email"
+                                  doc:id="c84b4bc4-5a65-41c1-9d0c-f1ebd3d8db7a">
+                        <ee:message>
+                            <ee:set-payload><![CDATA[%dw 2.0
+ output text/plain
+ ---
+ "Migration Report: \n"
+
+ ++ "\n Time [milliseconds]: " 		++ payload.elapsedTimeInMillis
+ ++ "\n Total Records: "				++ payload.totalRecords
+ ++ "\n Successful Records: "		++ payload.successfulRecords
+ ++ "\n Failed Records: "			++ payload.failedRecords
+ ++ "\n Loaded Records: "			++ payload.loadedRecords
+ ++ "\n Processed Records: " 		++ payload.processedRecords]]></ee:set-payload>
+                        </ee:message>
+                    </ee:transform>
+                    <email:send config-ref="Gmail_SMTP" doc:name="Send migration result email"
+                                doc:id="5896eaa9-dd10-47a2-a6fc-6319b11dbd06" fromAddress="${mail.from}"
+                                subject="${mail.subject}">
+                        <email:to-addresses>
+                            <email:to-address value="${mail.to}" />
+                        </email:to-addresses>
+                    </email:send>
+                </route>
+            </scatter-gather>
+        </batch:on-complete>
+    </batch:job>
+</flow>
+<flow name="mainFlow" doc:id="7c0a5bef-b3d5-442f-bff3-10d038f69a5e" >
+    <flow-ref doc:name="businessLogicFlow" doc:id="91360ede-4d71-44c7-9b64-8ee762e04ea0" name="businessLogicFlow"/>
+    <error-handler >
+        <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="488b507d-e26c-4c56-8759-8bb4f6645d71" type="ANY">
+            <flow-ref doc:name="errorHandlingFlow" doc:id="afdaf73c-0137-4d60-84f6-5c41234771a3" name="errorHandlingFlow" />
+        </on-error-propagate>
+    </error-handler>
+</flow>
+</mule>
+
+
+        
