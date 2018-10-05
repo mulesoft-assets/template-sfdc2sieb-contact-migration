@@ -37,15 +37,16 @@ http://www.mulesoft.org/schema/mule/siebel http://www.mulesoft.org/schema/mule/s
 	<configuration-properties file="mule.${mule.env}.properties"
 		doc:name="Configuration properties" doc:id="674beef8-9485-40a7-99b9-0685c9b7e863" />
 	<global-property doc:name="Global Property" name="mule.env"
-		value="dev" />		
-	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="5a03072b-0e30-432f-82ad-f9800cfcb1c0" >
+		value="dev" />
+	<salesforce:sfdc-config name="Salesforce_Config"
+		doc:name="Salesforce Config" doc:id="5a03072b-0e30-432f-82ad-f9800cfcb1c0">
 		<salesforce:basic-connection username="${sfdc.username}"
 			password="${sfdc.password}" securityToken="${sfdc.securityToken}" />
 	</salesforce:sfdc-config>
-	<siebel:siebel-config name="Siebel_JDB_Siebel" doc:name="Siebel JDB Siebel" doc:id="600488bc-8101-4d19-86aa-d9e96b846c0a">
+	<siebel:siebel-config name="Siebel_JDB_Siebel" doc:name="Siebel JDB Siebel" doc:id="30d10279-1705-49cf-9ead-5eb5cad0a31b" >
 		<siebel:basic-connection user="${sieb.user}"
-				password="${sieb.password}" server="${sieb.server}" port="${sieb.port}"
-				serverName="${sieb.serverName}" objectManager="${sieb.objectManager}" />
+			password="${sieb.password}" server="${sieb.server}" port="${sieb.port}"
+			serverName="${sieb.serverName}" objectManager="${sieb.objectManager}" />
 	</siebel:siebel-config>
 </mule>
 
