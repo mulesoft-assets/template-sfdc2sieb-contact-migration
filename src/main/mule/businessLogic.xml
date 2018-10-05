@@ -1,24 +1,138 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+<mule xmlns:siebel="http://www.mulesoft.org/schema/mule/siebel"
+      xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
       xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
       xmlns:email="http://www.mulesoft.org/schema/mule/email"
-      xmlns="http://www.mulesoft.org/schema/mule/core"
-      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+      xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/siebel http://www.mulesoft.org/schema/mule/siebel/current/mule-siebel.xsd">
 
 <flow name="businessLogicFlow" doc:id="884f86c5-66e1-4701-bb9b-594c2a60abf3" >
-    <batch:job jobName="migrateObjectsBatch" doc:id="79b373e6-1aeb-43a9-9dfe-8ac0d2f31fdc" >
+    <salesforce:query doc:name="Query contacts from SFDC" doc:id="df068045-7ea0-4510-86d4-f959c44a6fd9" config-ref="Salesforce_Config" targetValue="#[output application/java --- payload]">
+			<salesforce:salesforce-query >SELECT Department,Description,Email,FirstName,LastModifiedDate,LastName,MailingCity,MailingCountry,Phone,HomePhone,MobilePhone,OtherPhone,Title, Account.Id, Account.Name, Account.AccountNumber, Account.AccountSource, Account.AnnualRevenue, Account.BillingCity, Account.BillingCountry, Account.BillingPostalCode, Account.BillingState, Account.BillingStreet, Account.Description, Account.Fax, Account.Industry, Account.NumberOfEmployees, Account.Ownership, Account.ParentId, Account.Phone, Account.Rating, Account.ShippingCity, Account.ShippingCountry, Account.ShippingPostalCode, Account.ShippingState, Account.ShippingStreet, Account.Sic, Account.SicDesc, Account.Site, Account.TickerSymbol, Account.Type, Account.Website FROM Contact WHERE LastModifiedDate &gt; :lastModifiedDate ORDER BY Email ASC</salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"lastModifiedDate" : p('migration.startDate')
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<logger level="INFO" doc:name="Logger" doc:id="65a5e24d-5b38-455e-af6f-457892dd393f" message="SFDC contacts=#[output application/json --- payload]"/>
+		<batch:job jobName="migrateObjectsBatch" doc:id="79b373e6-1aeb-43a9-9dfe-8ac0d2f31fdc" blockSize="${page.size}">
         <batch:process-records >
-            <batch:step name="getContactsFromNetsuite" doc:id="232087de-e311-49c1-a890-439c65ea1af2" >
+        
+
+            <batch:step name="getContactsFromSiebelStep" doc:id="232087de-e311-49c1-a890-439c65ea1af2" acceptExpression="#[not isEmpty(payload.Email)]">
+					<ee:transform doc:name="Prepare query for contact select" doc:id="6841ebf2-06ab-4b0c-a00b-92039104f0ba" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="siebelQuery" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"fields" : ["Id", "First Name", "Last Name", "Work Phone #","Home Phone #",
+	"Email Address", "Fax Phone #",  "Assistant","Department", "Account"],
+	"searchSpec": {
+		"Email Address": "= '"++ payload.Email! ++ "'",
+	}
+}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<siebel:query-business-components businessObjectComponentType="Contact.Contact" doc:name="Select contact from Siebel" doc:id="fd35dc64-9000-405e-8a40-212613d6c3a7" config-ref="Siebel_JDB_Siebel" target="siebelContact">
+						<siebel:query-definition ><![CDATA[#[vars.siebelQuery]]]></siebel:query-definition>
+					</siebel:query-business-components>
+					<ee:transform doc:name="Add contact to payload" doc:id="381dfa0d-3dcf-490e-9f31-350de1f7a632" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload ++
+{
+	"siebelContact" : vars.siebelContact
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<logger level="INFO" doc:name="Logger" doc:id="fa2726b8-368a-4ccf-8276-047ba03514e5" message="siebel contact=#[output application/json --- payload]"/>
             </batch:step>
-            <batch:step name="upsertContactsInNetsuiteStep" doc:id="78a74ab4-9b91-416d-985a-acda2ac377eb">
-                <batch:aggregator doc:name="Batch Aggregator" doc:id="1ad86a98-643e-494a-a90a-32daab0b03cc" size="${page.size}">
-                </batch:aggregator>
+
+				<batch:step name="GetOrInsertAccountInSiebelStep" doc:id="6fb4e349-555a-4953-9023-6dc03f7e78a7" acceptExpression="#[(not isEmpty(payload.Email)) and (payload.Account != null)]">
+					<ee:transform doc:name="Prepare query for account select" doc:id="2f6184bd-14cd-4f5e-b9c9-08c87bf84eb5" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="siebelAccountInsertQuery" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"fields" : ["Id"],
+	"searchSpec": {
+		"Name": "= '"++ payload.Account.Name! ++ "'",
+	}
+}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<siebel:query-business-components businessObjectComponentType="Account.Account" doc:name="Select account from Siebel" doc:id="144f6de3-2829-434c-a83c-3986238a5900" config-ref="Siebel_JDB_Siebel" target="siebelSelectAccountRetVal">
+						<siebel:query-definition ><![CDATA[#[vars.siebelAccountInsertQuery]]]></siebel:query-definition>
+					</siebel:query-business-components>
+					<logger level="INFO" doc:name="Logger" doc:id="06670560-5935-4694-8f55-10e5556a2785" message="siebelSelectAccountRetVal=#[output application/json --- vars.siebelSelectAccountRetVal]"/>
+					<choice doc:name="Is account loaded?" doc:id="0c3d8b79-1849-4a90-bdc1-5ff9fe6ba34e" >
+						<when expression="#[isEmpty(vars.siebelSelectAccountRetVal.Id)]" >
+							<flow-ref doc:name="Call InsertAccountToSiebel" doc:id="28778ca7-9b3b-4da1-93ff-27a22f9f55a2" name="InsertAccountToSiebel"/>
+						</when>
+						<otherwise >
+							<ee:transform doc:name="Add selected account to payload" doc:id="dd6a534b-c2d1-47a1-b7a0-5e6c412787ff" >
+								<ee:message >
+									<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload ++
+{
+	"siebelAccount" : 
+	{
+		"Name" : payload.Account.Name,
+		"Id": vars.siebelSelectAccountRetVal.Id[0],
+		"status": "loaded"
+	}
+	
+}]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+						</otherwise>
+					</choice>
+					<logger level="INFO" doc:name="Logger" doc:id="a8df2841-fd45-448d-85a2-8ecb73adf824" message="contact with account=#[output application/json --- payload]"/>
+				</batch:step>
+				<batch:step name="upsertContactsInSiebelStep" doc:id="78a74ab4-9b91-416d-985a-acda2ac377eb" acceptExpression="#[not isEmpty(payload.Email)]">
+					<ee:transform doc:name="Prepare query for contact upsert" doc:id="e96d8607-dae4-4be9-9adf-57555944c5fd" >
+						<ee:message />
+						<ee:variables >
+							<ee:set-variable variableName="siebelContactUpsertQuery" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"First Name": payload.FirstName,
+	"Last Name": payload.LastName,
+	("Id" : payload.siebelContact[0].Id) if sizeOf(payload.siebelContact)>0,
+	"Email Address": payload.Email,
+    ("Account":  payload.siebelAccount.Name) if(
+    	((not isEmpty(payload.Account)) and  payload.Account.Name != payload.siebelAccount.Name) 
+    	or 
+    	sizeOf(payload.siebelContact)==0),	
+    "Department": payload.Department,
+    "Home Phone #": payload.HomePhone,
+    "Work Phone #": payload.Phone
+}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<logger level="INFO" doc:name="Logger" doc:id="ab8a7215-e6a5-453f-af1a-eb6897af36b2" message="Siebel contact upsert query=#[output application/json --- vars.siebelContactUpsertQuery]"/>
+					<siebel:upsert-business-component businessObjectComponentType="Contact.Contact" doc:name="Upsert Account in Siebel" doc:id="2b99be7f-15dd-4fd7-8410-186e305def88" config-ref="Siebel_JDB_Siebel" target="siebeAccountUpsertRetVal" >
+						<siebel:business-component-fields ><![CDATA[#[vars.siebelContactUpsertQuery]]]></siebel:business-component-fields>
+					</siebel:upsert-business-component>
             </batch:step>
         </batch:process-records>
         <batch:on-complete >
@@ -34,29 +148,65 @@ http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/ba
  output text/plain
  ---
  "Migration Report: \n"
-
- ++ "\n Time [milliseconds]: " 		++ payload.elapsedTimeInMillis
- ++ "\n Total Records: "				++ payload.totalRecords
- ++ "\n Successful Records: "		++ payload.successfulRecords
- ++ "\n Failed Records: "			++ payload.failedRecords
- ++ "\n Loaded Records: "			++ payload.loadedRecords
- ++ "\n Processed Records: " 		++ payload.processedRecords]]></ee:set-payload>
+  ++ "\n Total Records: "				++ payload.totalRecords!
+ ++ "\n Successful Records: "		++ payload.successfulRecords!
+ ++ "\n Failed Records: "			++ payload.failedRecords!
+ ++ "\n Loaded Records: "			++ payload.loadedRecords!
+ ++ "\n Processed Records: " 		++ payload.processedRecords!]]></ee:set-payload>
                         </ee:message>
                     </ee:transform>
-                    <email:send config-ref="Gmail_SMTP" doc:name="Send migration result email"
-                                doc:id="5896eaa9-dd10-47a2-a6fc-6319b11dbd06" fromAddress="${mail.from}"
-                                subject="${mail.subject}">
-                        <email:to-addresses>
-                            <email:to-address value="${mail.to}" />
-                        </email:to-addresses>
-                    </email:send>
+<!--                     <email:send config-ref="Gmail_SMTP" doc:name="Send migration result email" -->
+<!--                                 doc:id="5896eaa9-dd10-47a2-a6fc-6319b11dbd06" fromAddress="${mail.from}" -->
+<!--                                 subject="${mail.subject}"> -->
+<!--                         <email:to-addresses> -->
+<!--                             <email:to-address value="${mail.to}" /> -->
+<!--                         </email:to-addresses> -->
+<!--                     </email:send> -->
                 </route>
             </scatter-gather>
         </batch:on-complete>
     </batch:job>
 </flow>
-<flow name="mainFlow" doc:id="7c0a5bef-b3d5-442f-bff3-10d038f69a5e" >
-    <flow-ref doc:name="businessLogicFlow" doc:id="91360ede-4d71-44c7-9b64-8ee762e04ea0" name="businessLogicFlow"/>
+<sub-flow name="InsertAccountToSiebel" doc:id="10020eed-b59a-44f8-95cb-3da347fd4474" >
+		<logger level="INFO" doc:name="Logger" doc:id="4e406f89-33a2-4d74-ac0c-7a6b839eca12" message="Inserting account with name=#[payload.Account.Name]"/>
+		<ee:transform doc:name="Prepare query for account insert" doc:id="5b38e498-7a44-482a-8a6c-eb52a52cc356">
+						<ee:message>
+						</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="siebelAccountInsertQuery"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"Name": payload.Account.Name,
+	"Employees": payload.NumberOfEmployees,
+	"Description": payload.Account.Decription,
+}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+		<siebel:upsert-business-component businessObjectComponentType="Account.Account" doc:name="Insert Account in Siebel" doc:id="d8f27ee9-4f41-432e-8d54-480fde7ddd65" config-ref="Siebel_JDB_Siebel" target="siebelInsertAccountRetVal">
+						<siebel:business-component-fields><![CDATA[#[vars.siebelAccountInsertQuery]]]></siebel:business-component-fields>
+					</siebel:upsert-business-component>
+		<ee:transform doc:name="Add created account to payload" doc:id="39aa9479-5bba-43f3-8e6b-0598744fe5f8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload ++
+{
+	"siebelAccount" : 
+	{
+		"Name" : payload.Account.Name,
+		"Id": vars.siebelInsertAccountRetVal.CreatedObjectId,
+		"status": "new"
+	}
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<flow name="mainFlow" doc:id="7c0a5bef-b3d5-442f-bff3-10d038f69a5e" >
+    <logger level="INFO" doc:name="Logger" doc:id="b54b5c57-f23e-4012-b7d7-2509c5b153bf" message="MainFlow"/>
+		<flow-ref doc:name="Call businessLogicFlow" doc:id="91360ede-4d71-44c7-9b64-8ee762e04ea0" name="businessLogicFlow"/>
     <error-handler >
         <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="488b507d-e26c-4c56-8759-8bb4f6645d71" type="ANY">
             <flow-ref doc:name="errorHandlingFlow" doc:id="afdaf73c-0137-4d60-84f6-5c41234771a3" name="errorHandlingFlow" />
