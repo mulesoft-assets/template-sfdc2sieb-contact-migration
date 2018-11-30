@@ -105,7 +105,7 @@ payload ++
 					</choice>
 				</batch:step>
                 <batch:step name="upsertContactsInSiebelStep" doc:id="b079e509-1624-408a-a2bc-e7ca6c1c6055" acceptExpression="#[not isEmpty(payload.Email)]">
-                    <ee:transform doc:name="Prepare query for contact upsert" doc:id="702c3758-1004-4180-b052-d3b14600e835" >
+					<ee:transform doc:name="Prepare query for contact upsert" doc:id="702c3758-1004-4180-b052-d3b14600e835" >
                         <ee:message />
                         <ee:variables >
                             <ee:set-variable variableName="siebelContactUpsertQuery" ><![CDATA[%dw 2.0
@@ -127,9 +127,10 @@ output application/json
 }]]></ee:set-variable>
                         </ee:variables>
                     </ee:transform>
-                    <siebel:upsert-business-component businessObjectComponentType="Contact.Contact" doc:name="Upsert Account in Siebel" doc:id="2ae227f4-32ea-4ab4-920d-1ccb286d25a8" config-ref="Siebel_JDB_Siebel" target="siebeAccountUpsertRetVal" >
+					<siebel:upsert-business-component businessObjectComponentType="Contact.Contact" doc:name="Upsert Account in Siebel" doc:id="2ae227f4-32ea-4ab4-920d-1ccb286d25a8" config-ref="Siebel_JDB_Siebel" target="siebeAccountUpsertRetVal" >
                         <siebel:business-component-fields ><![CDATA[#[vars.siebelContactUpsertQuery]]]></siebel:business-component-fields>
                     </siebel:upsert-business-component>
+					<logger level="INFO" doc:name="Result from upsert" doc:id="3e4c2bf6-9f7f-4126-b045-71b845dd9a47" message="Upsert Siebel result #[output application/json --- vars.siebeAccountUpsertRetVal]" />
             </batch:step>
 				
         </batch:process-records>
