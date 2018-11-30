@@ -5,13 +5,14 @@
 	<parent>
 		<groupId>org.mule.templates</groupId>
 		<artifactId>templates-tooling-parent-pom</artifactId>
-		<version>2.1.7</version>
+		<version>2.1.10</version>
 	</parent>
 
 	<artifactId>template-sfdc2sieb-contact-migration</artifactId>
 	<packaging>mule-application</packaging>
 	<version>2.1.1-SNAPSHOT</version>
 	<name>template-sfdc2sieb-contact-migration</name>
+	
 	<build>
 		<plugins>
 			<plugin>
