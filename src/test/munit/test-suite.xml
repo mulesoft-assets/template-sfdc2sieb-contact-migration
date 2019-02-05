@@ -20,30 +20,29 @@ http://www.mulesoft.org/schema/mule/siebel http://www.mulesoft.org/schema/mule/s
 		doc:id="1d60570a-2966-49c4-8156-c1b73ac74ca9" file="mule.test.properties" />
 	<munit:before-test name="test-suiteBefore_Test"
 		description="Before tests actions" doc:id="775f76f6-8d63-4154-aa78-df823a8944ef">
+		<set-variable value="#[randomInt(8000)+1000]" doc:name="Set Variable" doc:id="303f472a-6853-4dd6-9b5a-0411f0c74803" variableName="testId"/>
 		<ee:transform doc:name="Prepare common testing data"
 			doc:id="fa4d75d7-0609-46cd-8ea1-e45c9a729f4d">
 			<ee:message />
 			<ee:variables>
 				<ee:set-variable variableName="testInterpreter1"><![CDATA[%dw 2.0
 output application/java
-var id= randomInt(1000)
 ---
 {	
-	FirstName: "TestRecord" ++ id,
-	LastName: "LastName" ++ id,
-    Email: "email" ++ id ++ "@gmail.com", 
+	FirstName: "TestRecord" ++ vars.testId ++ "_1",
+	LastName: "LastName" ++ vars.testId ++ "_1",
+    Email: "email" ++ vars.testId ++ "_1" ++ "@gmail.com", 
     Department: "testDepartment",
     HomePhone: "+421999555"
 }
 ]]></ee:set-variable>
 				<ee:set-variable variableName="testInterpreter2"><![CDATA[%dw 2.0
 output application/java
-var id= randomInt(1000)
 ---
 {
-	FirstName: "TestRecord" ++ id,
-	LastName: "LastName" ++ id,
-	Email: "email" ++ id ++ "@gmail.com",
+	FirstName: "TestRecord" ++ vars.testId ++ "_2",
+	LastName: "LastName" ++ vars.testId ++ "_2",
+	Email: "email" ++ vars.testId ++ "_2" ++ "@gmail.com",
 	Department: "testDepartment",
 	HomePhone: "+421999555"
 }
@@ -51,12 +50,11 @@ var id= randomInt(1000)
 ]]></ee:set-variable>
 				<ee:set-variable variableName="testInterpreter3"><![CDATA[%dw 2.0
 output application/java
-var id= randomInt(1000)
 ---
 {		
-	FirstName: "TestRecord" ++ id,
-	LastName: "LastName" ++ id,
-    Email: "email" ++ id ++ "@gmail.com", 
+	FirstName: "TestRecord" ++ vars.testId ++ "_3",
+	LastName: "LastName" ++ vars.testId ++ "_3",
+    Email: "email" ++ vars.testId ++ "_3" ++ "@gmail.com", 
     Department: "testDepartment",
     HomePhone: "+421999555"
 }
@@ -120,8 +118,16 @@ output application/java
 	<munit:test name="test-suite-mainFlowTest" description="Test"
 		doc:id="d0596deb-e4af-47a6-8a43-71939f83ec53">
 		<munit:execution>
-			<flow-ref doc:name="Flow-ref to mainFlow" doc:id="b194bd50-b42c-472f-8c58-8abc286110bf"
-				name="mainFlow" />
+			<flow-ref doc:name="Call querySFDCContacts" doc:id="4a733c74-db4f-40e6-b15d-5dab00167132" name="querySFDCContacts"/>
+			<ee:transform doc:name="Filter test data" doc:id="9f6e2bb4-0a04-47a7-b40f-e80b641871ee" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload filter ($.FirstName[0 to 14] == ("TestRecord" ++ vars.testId ++ "_"))]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<flow-ref doc:name="Call businessLogicFlow" doc:id="a7475609-e8f7-43c2-830d-51aecbaaaa2d" name="businessLogicFlow"/>
 			<scripting:execute doc:name="Sleep for 1m until the processing is completed"
 				doc:id="abf32d18-8660-4517-9fa9-e56ca18cc4fe" engine="groovy">
 				<scripting:code>sleep(60000)</scripting:code>

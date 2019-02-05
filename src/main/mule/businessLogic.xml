@@ -14,15 +14,6 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
 http://www.mulesoft.org/schema/mule/siebel http://www.mulesoft.org/schema/mule/siebel/current/mule-siebel.xsd">
 
 <flow name="businessLogicFlow" doc:id="884f86c5-66e1-4701-bb9b-594c2a60abf3" >
-    <salesforce:query doc:name="Query contacts from SFDC" doc:id="df068045-7ea0-4510-86d4-f959c44a6fd9" config-ref="Salesforce_Config" targetValue="#[output application/java --- payload]">
-			<salesforce:salesforce-query >SELECT Department,Description,Email,FirstName,LastModifiedDate,LastName,MailingCity,MailingCountry,Phone,HomePhone,MobilePhone,OtherPhone,Title, Account.Id, Account.Name, Account.AccountNumber, Account.AccountSource, Account.AnnualRevenue, Account.BillingCity, Account.BillingCountry, Account.BillingPostalCode, Account.BillingState, Account.BillingStreet, Account.Description, Account.Fax, Account.Industry, Account.NumberOfEmployees, Account.Ownership, Account.ParentId, Account.Phone, Account.Rating, Account.ShippingCity, Account.ShippingCountry, Account.ShippingPostalCode, Account.ShippingState, Account.ShippingStreet, Account.Sic, Account.SicDesc, Account.Site, Account.TickerSymbol, Account.Type, Account.Website FROM Contact WHERE LastModifiedDate &gt; :lastModifiedDate and Email&lt;&gt;'' ORDER BY Email ASC
-</salesforce:salesforce-query>
-			<salesforce:parameters ><![CDATA[#[output application/java
----
-{
-	"lastModifiedDate" : p('migration.startDate')
-}]]]></salesforce:parameters>
-		</salesforce:query>
 		<batch:job jobName="migrateObjectsBatch" doc:id="79b373e6-1aeb-43a9-9dfe-8ac0d2f31fdc" blockSize="${page.size}">
         <batch:process-records >
         
@@ -166,7 +157,18 @@ output application/json
         </batch:on-complete>
     </batch:job>
 </flow>
-<sub-flow name="InsertAccountToSiebel" doc:id="10020eed-b59a-44f8-95cb-3da347fd4474" >
+<sub-flow name="querySFDCContacts" doc:id="1b463b83-14a5-45a7-8490-681ec76c2a5d" >
+		<salesforce:query doc:name="Query contacts from SFDC" doc:id="df068045-7ea0-4510-86d4-f959c44a6fd9" config-ref="Salesforce_Config" targetValue="#[output application/java --- payload]">
+			<salesforce:salesforce-query>SELECT Department,Description,Email,FirstName,LastModifiedDate,LastName,MailingCity,MailingCountry,Phone,HomePhone,MobilePhone,OtherPhone,Title, Account.Id, Account.Name, Account.AccountNumber, Account.AccountSource, Account.AnnualRevenue, Account.BillingCity, Account.BillingCountry, Account.BillingPostalCode, Account.BillingState, Account.BillingStreet, Account.Description, Account.Fax, Account.Industry, Account.NumberOfEmployees, Account.Ownership, Account.ParentId, Account.Phone, Account.Rating, Account.ShippingCity, Account.ShippingCountry, Account.ShippingPostalCode, Account.ShippingState, Account.ShippingStreet, Account.Sic, Account.SicDesc, Account.Site, Account.TickerSymbol, Account.Type, Account.Website FROM Contact WHERE LastModifiedDate &gt; :lastModifiedDate and Email&lt;&gt;'' ORDER BY Email ASC
+</salesforce:salesforce-query>
+			<salesforce:parameters><![CDATA[#[output application/java
+---
+{
+	"lastModifiedDate" : p('migration.startDate')
+}]]]></salesforce:parameters>
+		</salesforce:query>
+	</sub-flow>
+	<sub-flow name="InsertAccountToSiebel" doc:id="10020eed-b59a-44f8-95cb-3da347fd4474" >
 		<logger level="INFO" doc:name="Logger" doc:id="4e406f89-33a2-4d74-ac0c-7a6b839eca12" message="Inserting account with name=#[payload.Account.Name]"/>
 		<ee:transform doc:name="Prepare query for account insert" doc:id="5b38e498-7a44-482a-8a6c-eb52a52cc356">
 						<ee:message>
@@ -204,6 +206,7 @@ payload ++
 		</ee:transform>
 	</sub-flow>
 	<flow name="mainFlow" doc:id="7c0a5bef-b3d5-442f-bff3-10d038f69a5e" >
+		<flow-ref doc:name="Call querySFDCContacts" doc:id="2c2ed3b8-9adb-4df1-8d41-0db0d122d574" name="querySFDCContacts"/>
 		<flow-ref doc:name="Call businessLogicFlow" doc:id="91360ede-4d71-44c7-9b64-8ee762e04ea0" name="businessLogicFlow"/>
     <error-handler >
         <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="488b507d-e26c-4c56-8759-8bb4f6645d71" type="ANY">
