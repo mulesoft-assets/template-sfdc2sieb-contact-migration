@@ -12,7 +12,7 @@
 	<packaging>mule-application</packaging>
 	<version>2.1.1-SNAPSHOT</version>
 	<name>template-sfdc2sieb-contact-migration</name>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -24,7 +24,7 @@
 					<sharedLibraries>
 						<!-- Please Add Siebel libraries -->
 					</sharedLibraries>
-					<classifier>mule-application</classifier>
+					<classifier>mule-application-template</classifier>
 				</configuration>
 			</plugin>
 		<plugin>
@@ -109,8 +109,8 @@
             <url>https://repository.mulesoft.org/releases/</url>
             <layout>default</layout>
         </repository>
-    </repositories> 	
-    
+    </repositories>
+
     <pluginRepositories>
         <pluginRepository>
             <id>mulesoft-releases</id>
@@ -121,6 +121,6 @@
                 <enabled>false</enabled>
             </snapshots>
         </pluginRepository>
-    </pluginRepositories>    	
+    </pluginRepositories>
 
 </project>
