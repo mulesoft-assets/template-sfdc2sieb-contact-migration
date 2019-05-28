@@ -149,7 +149,7 @@ payload filter ($.FirstName[0 to 14] == ("TestRecord" ++ vars.testId ++ "_"))]]>
 				is="#[MunitTools::equalTo(true)]" message="Assert test updated testRecord2 failed"/>
 			<munit-tools:assert-that doc:name="Assert test not migrated testRecord3"
 			doc:id="5407089e-7060-4952-902d-4f41746ed3f4" expression="#[vars.resultTestRecord3]"
-			is="#[MunitTools::equalTo(0)]" message="Assert test not migrated testRecord failed"/>
+			is="#[MunitTools::equalTo(0)]" message="Assert test not migrated testRecord3 failed"/>
 		</munit:validation>
 	</munit:test>
 	<sub-flow name="testRecord1" doc:id="d56875b0-d885-4852-9475-4ca1d3596f0c">
